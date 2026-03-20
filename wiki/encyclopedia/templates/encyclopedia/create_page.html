@@ -1,0 +1,13 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block body %}
+    <h1>Create Page</h1>
+    <form action="{%url 'create'%}" method = "post">
+        {%csrf_token%}
+        {{ form }}
+        <label>Enter your page:</label>
+        <textarea id="comments" name="comments" rows="4" cols="50">Default text can go here.</textarea>
+
+        <input type="submit">
+    </form>
+{% endblock %}
