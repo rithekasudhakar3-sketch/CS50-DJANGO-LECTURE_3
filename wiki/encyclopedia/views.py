@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 
 class NewPageForm(forms.Form):
     page = forms.CharField(label = "newpage")
+    content = forms.CharField(widget=forms.Textarea)
 
 
 def md_to_html(title):
@@ -27,20 +28,30 @@ def index(request):
         "entries": util.list_entries()
     })
 
-def entry(request,title):
-    html = md_to_html(title)
+def entry(request,name):
+    entry_data = []
+    entries = util.list_entries()
+    for entry in entries:
+        html = util.get_entry(entry)
+        content = md_to_html(entry)
+        entry_data.append({"title":entry,"Content":content})
     if html == None:
         return render(request,"encyclopedia/error.html")
     else:
-        return render(request,"encyclopedia/entry.html")
+        return render(request,"encyclopedia/entry.html",{
+        "entries": entry_data})
     
 def create(request):
     if request.method == "POST":
         form = NewPageForm(request.POST)
         if form.is_valid():
             entry = form.cleaned_data["page"]
+            content = form.cleaned_data["content"]
+            entries = [i.lower() for i in  util.list_entries()]
+            if(entry.lower() in entries):
+               return  render(request,"encyclopedia/error.html")
             # Save the new entry using util.save_entry or similar logic
-            util.save_entry(entry, "")  # You may want to add content from the form
+            util.save_entry(entry,content )  # You may want to add content from the form
             return HttpResponseRedirect(reverse("index"))
     else:
         form = NewPageForm()
